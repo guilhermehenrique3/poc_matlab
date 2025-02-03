@@ -99,9 +99,16 @@ app.post("/upload", upload.array("csvfiles", 314), async (req, res) => {
 
     console.log(`documents`, documents);
 
+    const groups = agruparEMedia(documents);
+
+    const toSave = {
+      uploadedAt: new Date(),
+      amostras: groups,
+    };
+
     console.log(`agrupado`, agruparEMedia(documents));
 
-    // await collection.insertMany(documents);
+    await collection.insertOne(toSave);
     res.status(200).json({
       message: `${req.files.length} arquivos processados com sucesso!`,
       data: documents,
