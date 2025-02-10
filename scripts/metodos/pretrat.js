@@ -1,6 +1,6 @@
-import * as preprocessMethods from "./preprocess.js";
+const preprocessMethods = require("./preprocess.js");
 
-export function pretrat(X, Xt, method) {
+function pretrat(X, Xt, method) {
   let Xprocessed = X.map((row) => [...row]);
   let Xtprocessed = Xt ? Xt.map((row) => [...row]) : null;
 
@@ -21,3 +21,5 @@ export function pretrat(X, Xt, method) {
     Xtp: Xtprocessed || Xprocessed,
   };
 }
+
+module.exports = { pretrat };

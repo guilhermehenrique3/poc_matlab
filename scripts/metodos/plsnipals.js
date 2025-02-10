@@ -1,17 +1,17 @@
-import * as math from "mathjs";
+const math = require("mathjs");
 
-export function plsNipals(Xs, ys, A) {
+function plsNipals(Xs, ys, A) {
   const M = Xs.length;
   const N = Xs[0].length;
 
-  const W = math.zeros(N, A);
-  const T = math.zeros(M, A);
-  const P = math.zeros(N, A);
-  const Q = math.zeros(A, 1);
+  let W = math.zeros(N, A);
+  let T = math.zeros(M, A);
+  let P = math.zeros(N, A);
+  let Q = math.zeros(A, 1);
   const R2X = [];
   const R2Y = [];
-  const Xr = math.clone(Xs);
-  const Yr = math.clone(ys);
+  let Xr = math.clone(Xs);
+  let Yr = math.clone(ys);
 
   for (let a = 0; a < A; a++) {
     let w = math.multiply(math.transpose(Xr), Yr);
@@ -37,3 +37,5 @@ export function plsNipals(Xs, ys, A) {
 
   return { B: W, W, T, P, Q, R2X, R2Y, Xr, Yr };
 }
+
+module.exports = plsNipals;

@@ -1,8 +1,8 @@
-import { pretreat } from "./pretreat.js";
-import { plsNipals } from "./plsNipals.js";
-import * as math from "mathjs";
+const { pretreat } = require("./pretreat.js");
+const { plsNipals } = require("./plsNipals.js");
+const math = require("mathjs");
 
-export function pls(X, y, A = 2, method = "center") {
+function pls(X, y, A = 2, method = "center") {
   const Mx = X.length;
   const Nx = X[0].length;
   A = Math.min(Mx, Nx, A);
@@ -65,3 +65,5 @@ function calculateMetrics(X, y, coef, Mx) {
 
   return { ypred, error, SST, SSR, SSE, R2, RMSEF };
 }
+
+module.exports = { pls };

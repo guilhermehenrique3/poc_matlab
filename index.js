@@ -3,6 +3,7 @@ const multer = require("multer");
 const csv = require("csv-parser");
 const fs = require("fs");
 const { MongoClient } = require("mongodb");
+const { trainPLS } = require("./plsexample.js");
 
 const uri =
   "mongodb+srv://guilhermehenriqu3:6UZDKQbsBNFLNqxy@cluster0.nfcvk.mongodb.net/?retryWrites=true&w=majority";
@@ -30,39 +31,64 @@ MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
     console.error("Erro ao conectar ao MongoDB", err);
   });
 
-function formatData(filename, arr) {
-  noEmpty = arr.filter((item) => Object.keys(item).length > 0);
-
-  const parsed = noEmpty.map((i) => ({
-    Intensity: i["_1"]?.split(";")[1] + "." + i["_2"],
-  }));
-
-  const sum = parsed.reduce((acc, curr) => acc + Number(curr.Intensity), 0);
-  const average = sum / parsed.length;
-  return {
-    uploadedAt: new Date(),
-    Amostra: filename?.split(`-`)[0],
-    Media: average,
-  };
-}
-
-function agruparEMedia(arr) {
+function agruparPorAmostraEMedia(arr) {
   const agrupado = arr.reduce((acc, item) => {
     if (!acc[item.Amostra]) {
-      acc[item.Amostra] = { Amostra: item.Amostra, MediaTotal: 0, Count: 0 };
+      acc[item.Amostra] = [];
     }
-    acc[item.Amostra].MediaTotal += item.Media;
-    acc[item.Amostra].Count += 1;
+    acc[item.Amostra].push(item.Values.map((v) => Number(v.Intensity)));
     return acc;
   }, {});
 
-  return Object.values(agrupado).map(({ Amostra, MediaTotal, Count }) => ({
-    Amostra,
-    Media: MediaTotal / Count,
+  return Object.keys(agrupado).map((amostra) => {
+    const matriz = agrupado[amostra];
+    const maxLength = Math.max(...matriz.map((arr) => arr.length));
+
+    const mediaValues = Array.from({ length: maxLength }, (_, i) => {
+      const valoresNaPosicao = matriz
+        .map((arr) => arr[i] || 0)
+        .filter((val) => !isNaN(val));
+
+      const media =
+        valoresNaPosicao.length > 0
+          ? valoresNaPosicao.reduce((a, b) => a + b, 0) / valoresNaPosicao.length
+          : 0;
+
+      return { Intensity: media };
+    });
+
+    return {
+      Amostra: amostra,
+      MediaValues: mediaValues,
+      UploadedAt: new Date(),
+    };
+  });
+}
+
+function formatData(filename, arr) {
+  const noEmpty = arr.filter((item) => Object.keys(item).length > 0);
+
+  const parsed = noEmpty.map((i) => ({
+    Intensity: parseFloat(i["_1"]?.split(";")[1] + "." + i["_2"]),
   }));
+
+  return {
+    UploadedAt: new Date(),
+    Amostra: filename?.split(`-`)[0],
+    Values: parsed,
+  };
+}
+
+function formatarParaX(data) {
+  return data.map((item, index) => [...item.MediaValues.map((v) => Number(v.Intensity))]);
 }
 
 app.post("/upload", upload.array("csvfiles", 314), async (req, res) => {
+  if (!db) {
+    console.error("Erro: db está undefined");
+    return res.status(500).send("Erro: Banco de dados não conectado.");
+  }
+
   if (!req.files || req.files.length === 0) {
     return res.status(400).send("Nenhum arquivo enviado.");
   }
@@ -97,21 +123,21 @@ app.post("/upload", upload.array("csvfiles", 314), async (req, res) => {
       })
     );
 
-    console.log(`documents`, documents);
-
-    const groups = agruparEMedia(documents);
+    const groups = agruparPorAmostraEMedia(documents);
 
     const toSave = {
       uploadedAt: new Date(),
       amostras: groups,
     };
 
-    console.log(`agrupado`, agruparEMedia(documents));
+    // await collection.insertOne(toSave);
 
-    await collection.insertOne(toSave);
+    trainPLS(formatarParaX(groups));
+    // trainPLS();
+
     res.status(200).json({
       message: `${req.files.length} arquivos processados com sucesso!`,
-      data: documents,
+      data: formatarParaX(groups),
     });
   } catch (error) {
     console.error("Erro no processamento:", error);

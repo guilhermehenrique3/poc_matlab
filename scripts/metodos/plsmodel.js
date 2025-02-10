@@ -1,7 +1,11 @@
-import { pretrat, pretreat } from "./preprocess.js";
-import { plssim } from "./pls.js";
-import { vipp } from "./stats.js";
-import { confidenceInt, fmerito, repetibility } from "./validation.js";
+const { pretreat } = require("./pretreat.js");
+const { pretrat } = require("./pretrat.js");
+
+const { plssim } = require("./pls.js");
+const { vipp } = require("./stats.js");
+const { confidenceInt } = require("./confidenceInt.js");
+const { fmerito } = require("./fmerito.js");
+const { repetibility } = require("./repetibility.js");
 
 class PLSModel {
   constructor(Xcal, ycal, Xprev, yprev, options = {}) {
@@ -95,4 +99,4 @@ class PLSModel {
   }
 }
 
-export default PLSModel;
+module.exports = PLSModel;

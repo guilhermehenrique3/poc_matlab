@@ -1,4 +1,4 @@
-export function tInv(p, df) {
+function tInv(p, df) {
   const a = (1 - p) * 2;
   const sign = a < 0 ? -1 : 1;
   const pAdj = Math.min(a, 2 - a);
@@ -59,3 +59,20 @@ function logGamma(z) {
   const t = z + g + 0.5;
   return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
 }
+
+function gamma(z) {
+  if (z === 0 || z === 1) return 1;
+  if (z === 0.5) return Math.sqrt(Math.PI);
+  return z * gamma(z - 1);
+}
+
+// Exportando a função principal e as funções auxiliares
+module.exports = {
+  tInv,
+  betaInv,
+  betaCDF,
+  incompleteBeta,
+  beta,
+  logGamma,
+  gamma,
+};

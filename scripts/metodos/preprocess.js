@@ -1,7 +1,6 @@
-import { savgol } from "./savitzkyGolay.js";
-import { emscorr, stdfir, osccalc, oscapp } from "./advancedPreprocessing.js";
+const math = require("mathjs");
 
-export function center(X, Xt) {
+function center(X, Xt) {
   const meanX = math.mean(X, 0);
   return {
     X: math.subtract(X, meanX),
@@ -9,7 +8,7 @@ export function center(X, Xt) {
   };
 }
 
-export function auto(X, Xt) {
+function auto(X, Xt) {
   const meanX = math.mean(X, 0);
   const stdX = math.std(X, 0);
   return {
@@ -18,7 +17,7 @@ export function auto(X, Xt) {
   };
 }
 
-export function snv(X, Xt) {
+function snv(X, Xt) {
   const process = (data) => {
     const rowMeans = math.mean(data, 1);
     const rowStd = math.std(data, 1);
@@ -31,7 +30,7 @@ export function snv(X, Xt) {
   };
 }
 
-export function msc(X, Xt) {
+function msc(X, Xt) {
   const meanX = math.mean(X, 0);
   const fitLine = (row) => {
     const coef = math.polynomialFit(meanX, row, 1);
@@ -44,4 +43,10 @@ export function msc(X, Xt) {
   };
 }
 
-// Implementar demais métodos (pareto, minmax, derivada, etc.) de forma similar
+// Exportando as funções
+module.exports = {
+  center,
+  auto,
+  snv,
+  msc,
+};

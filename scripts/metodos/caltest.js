@@ -1,18 +1,17 @@
-import { pretrat } from "./pretrat.js";
+const { pretrat } = require("./pretrat.js");
 
-export function caltest(X, y, ncal, alg, rep, method) {
+function caltest(X, y, ncal, alg, rep, method) {
   method = method || ["none"];
   rep = rep || 0;
   alg = alg || "k";
   ncal = ncal || 70;
 
-  if (!Array.isArray(y) || y.length !== X.length) {
-    y = new Array(X.length).fill(1);
+  if (!Array.isArray(y) || y?.length !== X?.length) {
+    y = new Array(X?.length).fill(1);
     rep = 0;
   }
 
   const X2 = pretrat(X, method);
-
   let y2 = handleReplicates(X2, y, rep);
 
   let ncalSamples;
@@ -97,7 +96,6 @@ function kenston(X, no_p, men) {
   const m = X[0].length;
   const meant = X[0].map((_, i) => X.reduce((sum, row) => sum + row[i], 0) / n);
 
-  // Seleção do primeiro ponto
   let distances = X.map((row) =>
     row.reduce((sum, val, i) => sum + Math.pow(val - meant[i], 2), 0)
   );
@@ -107,13 +105,11 @@ function kenston(X, no_p, men) {
       : distances.indexOf(Math.max(...distances)),
   ];
 
-  // Seleção do segundo ponto
   distances = X.map((row) =>
     row.reduce((sum, val, i) => sum + Math.pow(val - X[selected[0]][i], 2), 0)
   );
   selected.push(distances.indexOf(Math.max(...distances)));
 
-  // Seleção dos pontos restantes
   while (selected.length < no_p) {
     let maxMinDist = -Infinity;
     let bestIdx = -1;
@@ -140,7 +136,6 @@ function duplex(X, k) {
   let test = [];
   let remaining = Array.from({ length: n }, (_, i) => i);
 
-  // Função para encontrar o par mais distante
   const farthestPair = (arr) => {
     let maxDist = -Infinity;
     let pair = [0, 1];
@@ -159,7 +154,6 @@ function duplex(X, k) {
     return pair;
   };
 
-  // Seleção inicial
   let pair = farthestPair(remaining);
   model.push(...pair);
   remaining = remaining.filter((i) => !pair.includes(i));
@@ -167,7 +161,6 @@ function duplex(X, k) {
   test.push(...pair);
   remaining = remaining.filter((i) => !pair.includes(i));
 
-  // Seleção iterativa
   while (model.length < k && remaining.length > 0) {
     let maxDist = -Infinity;
     let bestIdx = -1;
@@ -189,10 +182,4 @@ function duplex(X, k) {
   return model;
 }
 
-function segmented(ncal, total) {
-  const indices = [];
-  for (let i = 0; i < total; i++) {
-    if (i % ncal !== 0) indices.push(i);
-  }
-  return indices;
-}
+module.exports = { caltest };

@@ -1,6 +1,6 @@
-import { tInv } from "./metodos/statistics.js";
+const { tInv } = require("./statistics.js");
 
-export function biasTest(realValues, predictedValues, pValue = 0.05) {
+function biasTest(realValues, predictedValues, pValue = 0.05) {
   if (realValues.length !== predictedValues.length) {
     throw new Error(
       "Os vetores de valores reais e previstos devem ter o mesmo comprimento"
@@ -45,3 +45,6 @@ export function biasTest(realValues, predictedValues, pValue = 0.05) {
 
   return result;
 }
+
+// Exportando para CommonJS
+module.exports = { biasTest };

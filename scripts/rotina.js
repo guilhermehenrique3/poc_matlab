@@ -1,18 +1,20 @@
-import { caltest } from "./metodos/caltest.js";
-import { pretrat } from "./metodos/pretrat.js";
-import { plsmodel } from "./metodos/plsmodel.js";
-import { biasTest } from "./metodos/biasTeste.js";
+const { caltest } = require("./metodos/caltest.js");
+const { pretrat } = require("./metodos/pretrat.js");
+const { plsmodel } = require("./metodos/plsmodel.js");
+const { biasTest } = require("./metodos/biasTeste.js");
 
-const dados = { x: [123, 123, 123], y: [123, 123, 123] };
+const dados = { x: [0.00016, 0.00016, 0.00016], y: [0.00016, 0.00016, 0.00016] };
 // a matriz de X e o processamento das amostras. ja o Y seria o arquivo que eles mandaram
 
-let X = dados.X;
+let X = dados.x;
 let y = dados.y;
 let prop = ["D"];
 let metodo = ["snv"];
 let X2 = X;
 
 let { objetos, Xcal, Xtest, ycal, ytest } = caltest(X, y, 70);
+
+console.log("call", objetos, Xcal, Xtest, ycal, ytest);
 
 let [Xcal2, Xtest2] = pretrat(Xcal, Xtest, ["snv"]);
 
@@ -84,3 +86,4 @@ let options = { vl: 9 };
 let modeloFinal = plsmodel(Xcal2, ycal, Xtest2, ytest, options);
 
 console.log("Processo concluído! Resultados:", resultados);
+console.log("modeloFinal:", modeloFinal);
