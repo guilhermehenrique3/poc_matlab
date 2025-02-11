@@ -1,13 +1,16 @@
 const express = require("express");
 const multer = require("multer");
 const csv = require("csv-parser");
+const cors = require("cors");
 const fs = require("fs");
 const { MongoClient } = require("mongodb");
 const { trainPLS } = require("./plsexample.js");
+const Y = require("./YMatrix.js").Y;
 
 const uri =
   "mongodb+srv://guilhermehenriqu3:6UZDKQbsBNFLNqxy@cluster0.nfcvk.mongodb.net/?retryWrites=true&w=majority";
 const app = express();
+app.use(cors());
 const port = 3000;
 
 const storage = multer.diskStorage({
@@ -95,6 +98,8 @@ app.post("/upload", upload.array("csvfiles", 314), async (req, res) => {
 
   try {
     const collection = db.collection("CSVFiles");
+    const collectionData = db.collection("processedData");
+
     const documents = [];
 
     await Promise.all(
@@ -127,13 +132,20 @@ app.post("/upload", upload.array("csvfiles", 314), async (req, res) => {
 
     const toSave = {
       uploadedAt: new Date(),
-      amostras: groups,
+      matrizX: formatarParaX(groups),
+      matrizY: Y,
     };
 
     // await collection.insertOne(toSave);
 
-    trainPLS(formatarParaX(groups));
-    // trainPLS();
+    const trainedData = {
+      uploadedAt: new Date(),
+      results: trainPLS(formatarParaX(groups)),
+    };
+
+    console.log("trainedData", trainedData);
+
+    // await collectionData.insertOne(trainedData);
 
     res.status(200).json({
       message: `${req.files.length} arquivos processados com sucesso!`,
@@ -148,6 +160,17 @@ app.post("/upload", upload.array("csvfiles", 314), async (req, res) => {
 app.get("/data", async (req, res) => {
   try {
     const collection = db.collection("CSVFiles");
+    const data = await collection.find().toArray();
+    res.json(data);
+  } catch (error) {
+    console.error("Erro ao buscar os dados:", error);
+    res.status(500).send("Erro ao buscar os dados.");
+  }
+});
+
+app.get("/processedData", async (req, res) => {
+  try {
+    const collection = db.collection("processedData");
     const data = await collection.find().toArray();
     res.json(data);
   } catch (error) {

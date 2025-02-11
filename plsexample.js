@@ -18,7 +18,7 @@ const trainPLS = (X) => {
   pls.train(XMatrix, YMatrix);
 
   const previsao = pls.predict(XMatrix);
-  console.log(JSON.stringify(previsao.to2DArray()));
+  return previsao.to2DArray();
 };
 
 module.exports = { trainPLS };
