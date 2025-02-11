@@ -149,7 +149,7 @@ app.post("/upload", upload.array("csvfiles", 314), async (req, res) => {
 
     res.status(200).json({
       message: `${req.files.length} arquivos processados com sucesso!`,
-      data: formatarParaX(groups),
+      data: trainPLS(formatarParaX(groups)),
     });
   } catch (error) {
     console.error("Erro no processamento:", error);
